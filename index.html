@@ -35,7 +35,6 @@
             padding: 15px 40px;
             box-shadow: var(--card-shadow);
             margin-bottom: 25px;
-            position: relative;
         }
 
         .header h1 {
@@ -102,18 +101,11 @@
             padding: 15px;
             box-shadow: var(--card-shadow);
             transition: transform 0.2s;
-            position: relative;
         }
 
         .day-card:hover {
             transform: translate(-2px, -2px);
             box-shadow: 6px 6px 0px #332211;
-        }
-
-        /* 今天突出的样式 */
-        .day-card.today {
-            background: #FFF2CC;
-            border-color: var(--main-orange);
         }
 
         .day-title {
@@ -178,24 +170,21 @@
 </head>
 <body>
 
-    <!-- 顶部标题 -->
     <div class="header">
         <h1>🚀 7.15 通关大作战</h1>
-        <p>不求完美，做完就是胜利！拒绝拖延，立刻消灭小格子！</p>
+        <p>进度自动保存哦！不求完美，做完就是胜利！</p>
     </div>
 
-    <!-- 进度条（ADHD快乐源泉） -->
     <div class="progress-container">
         <div class="progress-title">
             <span>🏆 总通关进度</span>
-            <span id="progress-text">0 / 25 个任务</span>
+            <span id="progress-text">0 / 23 个任务</span>
         </div>
         <div class="progress-bar-bg">
             <div class="progress-bar-fill" id="progress-fill"></div>
         </div>
     </div>
 
-    <!-- 计划卡片集中营 -->
     <div class="calendar-grid" id="calendar-grid"></div>
 
     <div class="footer">
@@ -205,15 +194,15 @@
     <script>
         // 核心任务数据填充
         const planData = [
-            { date: '7月6日 (周一)', tag: '单数日', tasks: ['资料分析：完成 1 章', '判断推理：完成 1 章', '言语理解：完成 1 章'] },
-            { date: '7月7日 (周二)', tag: '双数日', tasks: ['资料分析：完成 2 章 (多写点！)', '判断推理：完成 1 章', '言语理解：完成 1 章'] },
-            { date: '7月8日 (周三)', tag: '单数日', tasks: ['资料分析：完成 1 章', '判断推理：完成 1 章', '言语理解：完成 1 章'] },
-            { date: '7月9日 (周四)', tag: '双数日', tasks: ['资料分析：完成 2 章 (多写点！)', '判断推理：完成 1 章', '言语理解：完成 1 章'] },
-            { date: '7月10日 (周五)', tag: '单数日', tasks: ['资料分析：完成 1 章', '判断推理：完成 1 章', '言语理解：完成 1 章'] },
-            { date: '7月11日 (周六)', tag: '双数日', tasks: ['资料分析：完成 2 章 (多写点！)', '判断推理：完成 1 章', '言语理解：完成 1 章'] },
-            { date: '7月12日 (周日)', tag: '单数日', tasks: ['资料分析：完成 1 章 (资料通关啦！🎉)', '判断推理：完成 1 章 (判断通关啦！🎉)', '言语理解：完成 1 章'] },
-            { date: '7月13日 (周一)', tag: '扫尾日', tasks: ['言语理解：完成 1 章'] },
-            { date: '7月14日 (周二)', tag: '扫尾日', tasks: ['言语理解：完成 1 章 (全部通关！🥳)'] }
+            { date: '7月6日', tag: '单数日', tasks: ['资料分析：第1章', '判断推理：第3章', '言语理解：第1章'] },
+            { date: '7月7日', tag: '双数日', tasks: ['资料分析：第2-3章', '判断推理：第4章', '言语理解：第2章'] },
+            { date: '7月8日', tag: '单数日', tasks: ['资料分析：第4章', '判断推理：第5章', '言语理解：第3章'] },
+            { date: '7月9日', tag: '双数日', tasks: ['资料分析：第5-6章', '判断推理：第6章', '言语理解：第4章'] },
+            { date: '7月10日', tag: '单数日', tasks: ['资料分析：第7章', '判断推理：第7章', '言语理解：第5章'] },
+            { date: '7月11日', tag: '双数日', tasks: ['资料分析：第8-9章', '判断推理：第8章', '言语理解：第6章'] },
+            { date: '7月12日', tag: '单数日', tasks: ['资料分析：第10章', '判断推理：第9章', '言语理解：第7章'] },
+            { date: '7月13日', tag: '冲刺日', tasks: ['资料分析：第11-12章', '判断推理：第10-11章', '言语理解：第8-9章'] },
+            { date: '7月14日', tag: '终局日', tasks: ['资料分析：第13章 (完结!)', '判断推理：第12-13章 (完结!)', '言语理解：第10章 (完结!)'] }
         ];
 
         const grid = document.getElementById('calendar-grid');
@@ -222,16 +211,18 @@
         planData.forEach((day, dayIndex) => {
             const card = document.createElement('div');
             card.className = 'day-card';
-            
-            // 简单高亮第一天（你可以根据需要修改哪一天是today）
-            if(dayIndex === 0) card.classList.add('today');
 
             let tasksHtml = '';
             day.tasks.forEach((task, taskIndex) => {
                 const taskId = `task-${dayIndex}-${taskIndex}`;
+                // 从 localStorage 读取历史存储状态
+                const isChecked = localStorage.getItem(taskId) === 'true';
+                const completedClass = isChecked ? 'completed' : '';
+                const checkedAttr = isChecked ? 'checked' : '';
+
                 tasksHtml += `
-                    <li class="task-item" onclick="toggleTask('${taskId}', this)">
-                        <input type="checkbox" id="${taskId}" onclick="event.stopPropagation(); toggleTask('${taskId}', this.parentElement)">
+                    <li class="task-item ${completedClass}" onclick="toggleTask('${taskId}', this)">
+                        <input type="checkbox" id="${taskId}" ${checkedAttr} onclick="event.stopPropagation(); toggleTask('${taskId}', this.parentElement)">
                         <span>${task}</span>
                     </li>
                 `;
@@ -249,18 +240,19 @@
             grid.appendChild(card);
         });
 
-        // 任务勾选与多巴胺进度条联动逻辑
+        // 任务勾选、存储与进度条联动
         function toggleTask(id, element) {
             const checkbox = document.getElementById(id);
-            // 如果点击的是li标签，则手动反转checkbox状态
             if (event.target.tagName !== 'INPUT') {
                 checkbox.checked = !checkbox.checked;
             }
             
             if (checkbox.checked) {
                 element.classList.add('completed');
+                localStorage.setItem(id, 'true'); // 存入本地
             } else {
                 element.classList.remove('completed');
+                localStorage.setItem(id, 'false'); // 更新状态
             }
             updateProgress();
         }
@@ -274,7 +266,7 @@
             document.getElementById('progress-text').innerText = `${checked} / ${total} 个任务 (${percentage}%)`;
         }
 
-        // 初始化进度条
+        // 初始化加载进度
         updateProgress();
     </script>
 </body>
